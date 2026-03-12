@@ -58,11 +58,13 @@ npm start
 ## Deployment
 
 Render-ready config is included in [render.yaml](/home/falcon/Desktop/NOVORIQ%20FLOW/render.yaml).
+Netlify-ready config is included in [netlify.toml](/home/falcon/Desktop/NOVORIQ%20FLOW/netlify.toml).
 
 Supporting runtime files:
 
 - [.node-version](/home/falcon/Desktop/NOVORIQ%20FLOW/.node-version)
 - [package.json](/home/falcon/Desktop/NOVORIQ%20FLOW/package.json)
+- [docs/netlify-deploy.md](/home/falcon/Desktop/NOVORIQ%20FLOW/docs/netlify-deploy.md)
 
 ## Architecture Notes
 
