@@ -1,5 +1,6 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
 import {
   createContext,
   useContext,
@@ -32,6 +33,10 @@ function getStandaloneMode() {
     return false;
   }
 
+  if (Capacitor.isNativePlatform()) {
+    return true;
+  }
+
   return (
     window.matchMedia("(display-mode: standalone)").matches ||
     Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone)
@@ -53,9 +58,10 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
     }
 
     const standalone = getStandaloneMode();
+    const native = Capacitor.isNativePlatform();
     setIsStandalone(standalone);
     setIsInstalled(standalone);
-    setIsSupported("serviceWorker" in navigator);
+    setIsSupported("serviceWorker" in navigator && !native);
     document.documentElement.dataset.displayMode = standalone ? "standalone" : "browser";
 
     const mediaQuery = window.matchMedia("(display-mode: standalone)");
@@ -89,7 +95,7 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     };
 
-    if ("serviceWorker" in navigator) {
+    if ("serviceWorker" in navigator && !native) {
       if (document.readyState === "complete") {
         registerServiceWorker();
       } else {

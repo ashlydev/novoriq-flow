@@ -6,6 +6,7 @@ import { FlowV4Provider } from "@/components/shared/flow-v4-provider";
 import { FlowV5Provider } from "@/components/shared/flow-v5-provider";
 import { FlowV6Provider } from "@/components/shared/flow-v6-provider";
 import { FlowV7Provider } from "@/components/shared/flow-v7-provider";
+import { NativeAppProvider } from "@/components/shared/native-app-provider";
 import { PwaProvider } from "@/components/shared/pwa-provider";
 
 export const metadata: Metadata = {
@@ -47,19 +48,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <PwaProvider>
-          <BusinessOSProvider>
-            <FlowV3Provider>
-              <FlowV4Provider>
-                <FlowV5Provider>
-                  <FlowV6Provider>
-                    <FlowV7Provider>{children}</FlowV7Provider>
-                  </FlowV6Provider>
-                </FlowV5Provider>
-              </FlowV4Provider>
-            </FlowV3Provider>
-          </BusinessOSProvider>
-        </PwaProvider>
+        <NativeAppProvider>
+          <PwaProvider>
+            <BusinessOSProvider>
+              <FlowV3Provider>
+                <FlowV4Provider>
+                  <FlowV5Provider>
+                    <FlowV6Provider>
+                      <FlowV7Provider>{children}</FlowV7Provider>
+                    </FlowV6Provider>
+                  </FlowV5Provider>
+                </FlowV4Provider>
+              </FlowV3Provider>
+            </BusinessOSProvider>
+          </PwaProvider>
+        </NativeAppProvider>
       </body>
     </html>
   );

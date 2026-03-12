@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="flow_brand_surface">#132226</color>
+    <color name="flow_brand_surface_deep">#101A1D</color>
+    <color name="flow_brand_accent">#C9A95A</color>
+    <color name="flow_brand_accent_deep">#9B7C32</color>
+    <color name="flow_brand_ink">#FFF8EE</color>
+    <color name="colorPrimary">#132226</color>
+    <color name="colorPrimaryDark">#101A1D</color>
+    <color name="colorAccent">#C9A95A</color>
+</resources>

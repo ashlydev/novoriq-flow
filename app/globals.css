@@ -100,6 +100,10 @@ html[data-display-mode="standalone"] body {
     linear-gradient(180deg, #f4ecde 0%, #ebe2d2 100%);
 }
 
+html[data-native-platform="android"] body {
+  overscroll-behavior-y: none;
+}
+
 .marketing-shell,
 .auth-page,
 .app-shell,
@@ -999,6 +1003,14 @@ html[data-display-mode="standalone"] body {
   overflow-x: auto;
   scrollbar-width: none;
   z-index: 25;
+}
+
+html[data-native-platform="android"] .topbar {
+  padding-top: max(12px, env(safe-area-inset-top));
+}
+
+html[data-native-platform="android"] .bottom-nav {
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
 }
 
 .bottom-nav::-webkit-scrollbar {
