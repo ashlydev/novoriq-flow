@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useBusinessOS } from "@/components/shared/business-os-provider";
 import { useFlowV3 } from "@/components/shared/flow-v3-provider";
 import { useFlowV4 } from "@/components/shared/flow-v4-provider";
@@ -120,6 +121,8 @@ const quickRail: Array<{
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const { canAccess, currentRole, currentUser, currentWorkspace, unreadNotificationsCount, signOut } =
     useBusinessOS();
   const {
@@ -149,10 +152,69 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     unreadEnterpriseCount +
     unreadIntelligenceCount;
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const stored = window.localStorage.getItem("novoriq-flow-sidebar-collapsed");
+    setIsSidebarCollapsed(stored === "true");
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(
+      "novoriq-flow-sidebar-collapsed",
+      String(isSidebarCollapsed)
+    );
+  }, [isSidebarCollapsed]);
+
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [pathname]);
+
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
+    <div
+      className={cn(
+        "app-shell",
+        isSidebarCollapsed && "app-shell-collapsed",
+        isSidebarOpen && "app-shell-nav-open"
+      )}
+    >
+      <button
+        aria-label="Close navigation"
+        aria-hidden={!isSidebarOpen}
+        className={cn("sidebar-overlay", isSidebarOpen && "sidebar-overlay-visible")}
+        onClick={() => setIsSidebarOpen(false)}
+        type="button"
+      />
+
+      <aside className={cn("sidebar", isSidebarCollapsed && "sidebar-collapsed", isSidebarOpen && "sidebar-open")}>
         <div className="brand-block">
+          <div className="sidebar-utility-row">
+            <p className="sidebar-kicker">Novoriq Flow</p>
+            <div className="sidebar-toggle-row">
+              <button
+                aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                className="text-button sidebar-toggle desktop-toggle"
+                onClick={() => setIsSidebarCollapsed((current) => !current)}
+                type="button"
+              >
+                {isSidebarCollapsed ? "Expand" : "Collapse"}
+              </button>
+              <button
+                aria-label="Close sidebar"
+                className="text-button sidebar-toggle mobile-toggle"
+                onClick={() => setIsSidebarOpen(false)}
+                type="button"
+              >
+                Close
+              </button>
+            </div>
+          </div>
           <Link className="brand-mark" href="/app/dashboard">
             <span>Novoriq</span>
             <strong>Flow</strong>
@@ -197,8 +259,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="main-column">
         <header className="topbar">
-          <div>
-            <p className="eyebrow">Business, enterprise, and intelligence system</p>
+          <div className="topbar-copy">
+            <div className="topbar-menu-row">
+              <button
+                aria-label="Open navigation menu"
+                className="button button-secondary topbar-menu-button"
+                onClick={() => setIsSidebarOpen(true)}
+                type="button"
+              >
+                Menu
+              </button>
+              <p className="eyebrow topbar-kicker">Business, enterprise, and intelligence system</p>
+            </div>
             <strong>{currentWorkspace?.name || "Workspace setup"}</strong>
             {currentBusinessProfile ? (
               <p className="brand-caption" style={{ marginTop: 6 }}>
@@ -206,7 +278,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </p>
             ) : null}
           </div>
-          <div className="topbar-actions">
+          <div className="topbar-actions topbar-actions-wide">
             {branches.length ? (
               <label className="field" style={{ minWidth: 180 }}>
                 <span>Branch</span>

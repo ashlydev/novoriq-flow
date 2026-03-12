@@ -16,12 +16,12 @@ export function PageHeader({
 }) {
   return (
     <div className="page-header">
-      <div>
+      <div className="page-header-copy">
         {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
         <h1>{title}</h1>
         {description ? <p className="page-description">{description}</p> : null}
       </div>
-      {action ? <div className="page-action">{action}</div> : null}
+      {action ? <div className="page-header-action">{action}</div> : null}
     </div>
   );
 }
@@ -49,9 +49,9 @@ export function MetricCard({
 }) {
   return (
     <Card className={cn("metric-card", `tone-${tone}`)}>
-      <span className="metric-label">{label}</span>
+      <p className="metric-label">{label}</p>
       <strong className="metric-value">{value}</strong>
-      {hint ? <span className="metric-hint">{hint}</span> : null}
+      {hint ? <p className="metric-hint">{hint}</p> : null}
     </Card>
   );
 }
