@@ -33,7 +33,12 @@ import {
   seedFlowV7State,
   upgradeFlowV7State
 } from "@/lib/v7-seed";
-import { loadFlowV7State, saveFlowV7State } from "@/lib/v7-storage";
+import {
+  loadFlowV7State,
+  loadRemoteFlowV7State,
+  queueFlowV7StateSave,
+  saveFlowV7State
+} from "@/lib/v7-storage";
 import {
   ActionTask,
   AssistantDraft,
@@ -232,20 +237,39 @@ export function FlowV7Provider({ children }: { children: React.ReactNode }) {
   } = useFlowV6();
   const [state, setState] = useState<FlowV7State>(createEmptyFlowV7State);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isRemoteStateReady, setIsRemoteStateReady] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const loaded = loadFlowV7State();
     setState(upgradeFlowV7State(loaded || seedFlowV7State));
     setIsHydrated(true);
+
+    void loadRemoteFlowV7State().then((remoteState) => {
+      if (!isMounted) {
+        return;
+      }
+
+      if (remoteState) {
+        setState(upgradeFlowV7State(remoteState));
+      }
+
+      setIsRemoteStateReady(true);
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
-    if (!isHydrated) {
+    if (!isHydrated || !isRemoteStateReady) {
       return;
     }
 
     saveFlowV7State(state);
-  }, [isHydrated, state]);
+    queueFlowV7StateSave(state);
+  }, [isHydrated, isRemoteStateReady, state]);
 
   useEffect(() => {
     if (!isHydrated || !currentWorkspace || !currentUser) {

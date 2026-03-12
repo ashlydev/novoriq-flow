@@ -25,7 +25,12 @@ import {
   seedFlowV3State,
   upgradeFlowV3State
 } from "@/lib/v3-seed";
-import { loadFlowV3State, saveFlowV3State } from "@/lib/v3-storage";
+import {
+  loadFlowV3State,
+  loadRemoteFlowV3State,
+  queueFlowV3StateSave,
+  saveFlowV3State
+} from "@/lib/v3-storage";
 import {
   ApprovalEntityType,
   ApprovalRequest,
@@ -427,21 +432,40 @@ export function FlowV3Provider({ children }: { children: React.ReactNode }) {
   } = useBusinessOS();
   const [state, setState] = useState(createEmptyFlowV3State);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isRemoteStateReady, setIsRemoteStateReady] = useState(false);
   const [currentBranchId, setCurrentBranchId] = useState("all");
 
   useEffect(() => {
+    let isMounted = true;
     const loaded = loadFlowV3State();
     setState(upgradeFlowV3State(loaded || seedFlowV3State));
     setIsHydrated(true);
+
+    void loadRemoteFlowV3State().then((remoteState) => {
+      if (!isMounted) {
+        return;
+      }
+
+      if (remoteState) {
+        setState(upgradeFlowV3State(remoteState));
+      }
+
+      setIsRemoteStateReady(true);
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
-    if (!isHydrated) {
+    if (!isHydrated || !isRemoteStateReady) {
       return;
     }
 
     saveFlowV3State(state);
-  }, [isHydrated, state]);
+    queueFlowV3StateSave(state);
+  }, [isHydrated, isRemoteStateReady, state]);
 
   useEffect(() => {
     if (!isHydrated || !currentWorkspace) {

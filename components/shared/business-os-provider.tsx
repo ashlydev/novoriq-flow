@@ -34,7 +34,9 @@ import {
 } from "@/lib/seed";
 import {
   loadStoredSession,
+  loadRemoteStoredState,
   loadStoredState,
+  queueStoredStateSave,
   saveStoredSession,
   saveStoredState
 } from "@/lib/storage";
@@ -670,8 +672,10 @@ export function BusinessOSProvider({ children }: { children: React.ReactNode }) 
   const [state, setState] = useState<AppState>(seedAppState);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isRemoteStateReady, setIsRemoteStateReady] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const storedState = loadStoredState();
     const storedSession = loadStoredSession();
 
@@ -681,15 +685,32 @@ export function BusinessOSProvider({ children }: { children: React.ReactNode }) 
 
     setCurrentUserId(storedSession.currentUserId);
     setIsHydrated(true);
+
+    void loadRemoteStoredState().then((remoteState) => {
+      if (!isMounted) {
+        return;
+      }
+
+      if (remoteState) {
+        setState(upgradeAppState(remoteState));
+      }
+
+      setIsRemoteStateReady(true);
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
-    if (!isHydrated) {
+    if (!isHydrated || !isRemoteStateReady) {
       return;
     }
 
     saveStoredState(state);
-  }, [isHydrated, state]);
+    queueStoredStateSave(state);
+  }, [isHydrated, isRemoteStateReady, state]);
 
   useEffect(() => {
     if (!isHydrated) {

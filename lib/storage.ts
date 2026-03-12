@@ -1,9 +1,15 @@
 import { AppState } from "@/lib/types";
+import {
+  hasRemoteSnapshotChanged,
+  loadRemoteSnapshot,
+  queueRemoteSnapshotSave
+} from "@/lib/runtime-sync";
 
 export const STATE_STORAGE_KEY = "novoriq-flow-state-v2";
 export const LEGACY_STATE_STORAGE_KEY = "novoriq-businessos-state-v1";
 export const SESSION_STORAGE_KEY = "novoriq-flow-session-v2";
 export const LEGACY_SESSION_STORAGE_KEY = "novoriq-businessos-session-v1";
+const REMOTE_STATE_SNAPSHOT_KEY = "app-state";
 
 export interface SessionState {
   currentUserId: string | null;
@@ -34,6 +40,18 @@ export function saveStoredState(state: AppState) {
   }
 
   window.localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(state));
+}
+
+export async function loadRemoteStoredState() {
+  return loadRemoteSnapshot<AppState>(REMOTE_STATE_SNAPSHOT_KEY);
+}
+
+export function queueStoredStateSave(state: AppState) {
+  if (!hasRemoteSnapshotChanged(REMOTE_STATE_SNAPSHOT_KEY, state)) {
+    return;
+  }
+
+  queueRemoteSnapshotSave(REMOTE_STATE_SNAPSHOT_KEY, state);
 }
 
 export function loadStoredSession(): SessionState {

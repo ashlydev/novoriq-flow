@@ -27,7 +27,12 @@ import {
   seedFlowV4State,
   upgradeFlowV4State
 } from "@/lib/v4-seed";
-import { loadFlowV4State, saveFlowV4State } from "@/lib/v4-storage";
+import {
+  loadFlowV4State,
+  loadRemoteFlowV4State,
+  queueFlowV4StateSave,
+  saveFlowV4State
+} from "@/lib/v4-storage";
 import {
   BusinessConnection,
   BusinessProfile,
@@ -224,20 +229,39 @@ export function FlowV4Provider({ children }: { children: React.ReactNode }) {
   const { branches } = useFlowV3();
   const [state, setState] = useState<FlowV4State>(createEmptyFlowV4State);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isRemoteStateReady, setIsRemoteStateReady] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const loaded = loadFlowV4State();
     setState(upgradeFlowV4State(loaded || seedFlowV4State));
     setIsHydrated(true);
+
+    void loadRemoteFlowV4State().then((remoteState) => {
+      if (!isMounted) {
+        return;
+      }
+
+      if (remoteState) {
+        setState(upgradeFlowV4State(remoteState));
+      }
+
+      setIsRemoteStateReady(true);
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
-    if (!isHydrated) {
+    if (!isHydrated || !isRemoteStateReady) {
       return;
     }
 
     saveFlowV4State(state);
-  }, [isHydrated, state]);
+    queueFlowV4StateSave(state);
+  }, [isHydrated, isRemoteStateReady, state]);
 
   const currentBusinessId = getCurrentBusinessProfileId(currentWorkspace?.id);
 

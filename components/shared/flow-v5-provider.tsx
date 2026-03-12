@@ -21,7 +21,12 @@ import {
   mergeFinanceAuditLogs
 } from "@/lib/v5-calculations";
 import { createEmptyFlowV5State, seedFlowV5State, upgradeFlowV5State } from "@/lib/v5-seed";
-import { loadFlowV5State, saveFlowV5State } from "@/lib/v5-storage";
+import {
+  loadFlowV5State,
+  loadRemoteFlowV5State,
+  queueFlowV5StateSave,
+  saveFlowV5State
+} from "@/lib/v5-storage";
 import {
   FinanceNotification,
   FlowV5State,
@@ -157,20 +162,39 @@ export function FlowV5Provider({ children }: { children: React.ReactNode }) {
   const { networkAuditLogs, networkSummary, purchaseOrders, supplierActivitySummary } = useFlowV4();
   const [state, setState] = useState<FlowV5State>(createEmptyFlowV5State);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isRemoteStateReady, setIsRemoteStateReady] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const loaded = loadFlowV5State();
     setState(upgradeFlowV5State(loaded || seedFlowV5State));
     setIsHydrated(true);
+
+    void loadRemoteFlowV5State().then((remoteState) => {
+      if (!isMounted) {
+        return;
+      }
+
+      if (remoteState) {
+        setState(upgradeFlowV5State(remoteState));
+      }
+
+      setIsRemoteStateReady(true);
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
-    if (!isHydrated) {
+    if (!isHydrated || !isRemoteStateReady) {
       return;
     }
 
     saveFlowV5State(state);
-  }, [isHydrated, state]);
+    queueFlowV5StateSave(state);
+  }, [isHydrated, isRemoteStateReady, state]);
 
   useEffect(() => {
     if (!isHydrated || !currentWorkspace) {

@@ -26,7 +26,12 @@ import {
   seedFlowV6State,
   upgradeFlowV6State
 } from "@/lib/v6-seed";
-import { loadFlowV6State, saveFlowV6State } from "@/lib/v6-storage";
+import {
+  loadFlowV6State,
+  loadRemoteFlowV6State,
+  queueFlowV6StateSave,
+  saveFlowV6State
+} from "@/lib/v6-storage";
 import {
   BranchControlSetting,
   ControlPolicy,
@@ -220,20 +225,39 @@ export function FlowV6Provider({ children }: { children: React.ReactNode }) {
   } = useFlowV5();
   const [state, setState] = useState<FlowV6State>(createEmptyFlowV6State);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isRemoteStateReady, setIsRemoteStateReady] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const loaded = loadFlowV6State();
     setState(upgradeFlowV6State(loaded || seedFlowV6State));
     setIsHydrated(true);
+
+    void loadRemoteFlowV6State().then((remoteState) => {
+      if (!isMounted) {
+        return;
+      }
+
+      if (remoteState) {
+        setState(upgradeFlowV6State(remoteState));
+      }
+
+      setIsRemoteStateReady(true);
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
-    if (!isHydrated) {
+    if (!isHydrated || !isRemoteStateReady) {
       return;
     }
 
     saveFlowV6State(state);
-  }, [isHydrated, state]);
+    queueFlowV6StateSave(state);
+  }, [isHydrated, isRemoteStateReady, state]);
 
   useEffect(() => {
     if (!isHydrated || !currentWorkspace || !currentUser) {
