@@ -15,6 +15,18 @@ npm install
 npm run dev
 ```
 
+## Deploy
+
+Render-ready config is included in [render.yaml](/home/falcon/Desktop/NOVORIQ FLOW/render.yaml).
+
+Expected production commands:
+
+```bash
+npm ci
+npm run build
+npm start
+```
+
 ## Demo credentials
 
 - Email: `owner@novoriq.demo`
