@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="flow_background">#0F172A</color>
+    <color name="flow_surface">#1E293B</color>
+    <color name="flow_brand_surface">@color/flow_surface</color>
+    <color name="flow_brand_surface_deep">@color/flow_background</color>
+    <color name="flow_surface_variant">#334155</color>
+    <color name="flow_drawer_background">#0B1220</color>
+    <color name="flow_primary">#2563EB</color>
+    <color name="flow_primary_pressed">#1D4ED8</color>
+    <color name="flow_secondary">#38BDF8</color>
+    <color name="flow_success">#16A34A</color>
+    <color name="flow_warning">#F59E0B</color>
+    <color name="flow_error">#DC2626</color>
+    <color name="flow_info">#0EA5E9</color>
+    <color name="flow_text_primary">#F8FAFC</color>
+    <color name="flow_text_secondary">#CBD5E1</color>
+    <color name="flow_text_muted">#94A3B8</color>
+    <color name="flow_divider">#1F94A3B8</color>
+    <color name="flow_border_subtle">#2E94A3B8</color>
+</resources>

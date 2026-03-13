@@ -32,6 +32,7 @@ V7 promise:
 - TypeScript
 - Prisma schema targeting PostgreSQL for production modeling
 - Local-first runtime persistence for demo/workshop use in this workspace
+- Native Android V1 client in Kotlin + Jetpack Compose under `android-native/`
 
 ## Run Locally
 
@@ -48,6 +49,24 @@ Open `http://localhost:3000`.
 npm ci
 npm run build
 npm start
+```
+
+## Native Android V1
+
+This repo also includes a real native Android client:
+
+- project: `android-native/`
+- stack: Kotlin, Jetpack Compose, Material 3, ViewModels, Coroutines + Flow
+- theme: Midnight Ledger - Flow Edition
+
+Build the Android debug APK:
+
+```bash
+cd "android-native"
+GRADLE_USER_HOME="$(pwd)/.gradle-home" \
+ANDROID_HOME=/home/falcon/Android/Sdk \
+ANDROID_SDK_ROOT=/home/falcon/Android/Sdk \
+./gradlew :app:assembleDebug --no-daemon -Dkotlin.compiler.execution.strategy=in-process --console plain
 ```
 
 ## Demo Credentials
@@ -81,6 +100,7 @@ Supporting runtime files:
 - [docs/v5-upgrade.md](/home/falcon/Desktop/NOVORIQ%20FLOW/docs/v5-upgrade.md)
 - [docs/v6-upgrade.md](/home/falcon/Desktop/NOVORIQ%20FLOW/docs/v6-upgrade.md)
 - [docs/v7-upgrade.md](/home/falcon/Desktop/NOVORIQ%20FLOW/docs/v7-upgrade.md)
+- [docs/android-native-v1.md](/home/falcon/Desktop/NOVORIQ%20FLOW/docs/android-native-v1.md)
 
 ## Important Notes
 
